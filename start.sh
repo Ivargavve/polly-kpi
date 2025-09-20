@@ -55,7 +55,7 @@ pip install -r requirements.txt
 
 # Start backend in background
 echo "🚀 Starting FastAPI backend..."
-python -m uvicorn main:app --reload --port 8000 &
+python3 -m uvicorn main:app --reload --port 8000 &
 BACKEND_PID=$!
 
 cd ..
