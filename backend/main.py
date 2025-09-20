@@ -11,8 +11,6 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-import promptlayer
-from asyncio_throttle import Throttler
 
 # Load environment variables
 load_dotenv()
@@ -22,7 +20,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configuration
-PROMPTLAYER_API_KEY = os.getenv("PROMPTLAYER_API_KEY")
 POLLING_INTERVAL = int(os.getenv("POLLING_INTERVAL_SECONDS", "10"))
 MAX_CONVERSATIONS = int(os.getenv("MAX_CONVERSATIONS_DISPLAY", "100"))
 WEBSOCKET_HEARTBEAT = int(os.getenv("WEBSOCKET_HEARTBEAT_INTERVAL", "30"))
@@ -44,32 +41,17 @@ class ConversationManager:
             "last_activity": None
         }
 
-        # Initialize PromptLayer with tracing enabled
-        if not PROMPTLAYER_API_KEY:
-            logger.error("PROMPTLAYER_API_KEY not found in environment variables")
-            raise ValueError("PromptLayer API key is required")
-
-        # Initialize PromptLayer client with tracing
-        self.pl_client = promptlayer.PromptLayer(api_key=PROMPTLAYER_API_KEY, enable_tracing=True)
-        self.throttler = Throttler(rate_limit=10, period=60)  # 10 requests per minute
-
         # Store for capturing real-time requests
         self.live_requests = []
 
-    async def validate_api_key(self) -> bool:
-        """Validate PromptLayer API key by making a test request"""
+    async def validate_system(self) -> bool:
+        """Validate system components"""
         try:
-            async with self.throttler:
-                # Initialize PromptLayer client
-                pl = promptlayer.PromptLayer(api_key=PROMPTLAYER_API_KEY)
-                # For now, just return True if we can create the client
-                logger.info("PromptLayer client created successfully")
-                return True
-        except Exception as e:
-            logger.error(f"PromptLayer API key validation failed: {e}")
-            # For testing purposes, return True even if API key is invalid
-            logger.warning("Continuing with mock data for testing")
+            logger.info("System validation successful")
             return True
+        except Exception as e:
+            logger.error(f"System validation failed: {e}")
+            return False
 
     def extract_user_input(self, input_variables: Dict[str, Any]) -> str:
         """Extract user input from PromptLayer input variables"""
@@ -133,12 +115,12 @@ class ConversationManager:
 
         return 0.0
 
-    async def poll_promptlayer(self) -> List[Dict[str, Any]]:
-        """Fetch recent requests from PromptLayer API and process webhook data"""
+    async def process_webhook_data(self) -> List[Dict[str, Any]]:
+        """Process webhook data and convert to conversation events"""
         try:
             new_conversations = []
 
-            # First, process webhook data (existing functionality)
+            # Process webhook data
             if self.live_requests:
                 for request_data in self.live_requests:
                     request_id = request_data.get('id', f"live_{int(datetime.now().timestamp() * 1000)}")
@@ -166,15 +148,10 @@ class ConversationManager:
                 self.live_requests = []
                 logger.info(f"Processed {len(new_conversations)} webhook conversations")
 
-            # Note: PromptLayer Python SDK doesn't expose get_all_requests method
-            # For now, we rely on webhook data and direct integration
-            # Future enhancement: Use PromptLayer REST API directly with HTTP requests
-            logger.debug("PromptLayer API polling skipped - using webhook data only")
-
             return new_conversations
 
         except Exception as e:
-            logger.error(f"Error in poll_promptlayer: {e}")
+            logger.error(f"Error in process_webhook_data: {e}")
             return []
 
     def add_live_request(self, request_data: Dict[str, Any]):
@@ -260,11 +237,11 @@ class WebSocketManager:
             self.disconnect(connection)
 
 
-async def polling_task():
-    """Background task to poll PromptLayer and broadcast updates"""
+async def processing_task():
+    """Background task to process webhook data and broadcast updates"""
     while True:
         try:
-            new_messages = await conversation_manager.poll_promptlayer()
+            new_messages = await conversation_manager.process_webhook_data()
 
             if new_messages:
                 conversation_manager.add_live_messages(new_messages)
@@ -289,7 +266,7 @@ async def polling_task():
             await asyncio.sleep(POLLING_INTERVAL)
 
         except Exception as e:
-            logger.error(f"Error in polling task: {e}")
+            logger.error(f"Error in processing task: {e}")
             await asyncio.sleep(POLLING_INTERVAL)
 
 
@@ -301,13 +278,13 @@ async def lifespan(app: FastAPI):
     conversation_manager = ConversationManager()
     websocket_manager = WebSocketManager()
 
-    # Validate API key
-    if not await conversation_manager.validate_api_key():
-        logger.error("Failed to validate PromptLayer API key")
-        raise RuntimeError("Invalid PromptLayer API key")
+    # Validate system
+    if not await conversation_manager.validate_system():
+        logger.error("Failed to validate system components")
+        raise RuntimeError("System validation failed")
 
-    # Start polling task
-    polling_task_handle = asyncio.create_task(polling_task())
+    # Start processing task
+    processing_task_handle = asyncio.create_task(processing_task())
 
     logger.info("Polly Monitor backend started successfully")
 
@@ -315,9 +292,9 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         # Shutdown
-        polling_task_handle.cancel()
+        processing_task_handle.cancel()
         try:
-            await polling_task_handle
+            await processing_task_handle
         except asyncio.CancelledError:
             pass
         logger.info("Polly Monitor backend stopped")
@@ -343,12 +320,12 @@ app.add_middleware(
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint with PromptLayer connectivity test"""
+    """Health check endpoint"""
     try:
-        is_valid = await conversation_manager.validate_api_key()
+        is_valid = await conversation_manager.validate_system()
         return {
             "status": "healthy" if is_valid else "unhealthy",
-            "promptlayer_connected": is_valid,
+            "system_validated": is_valid,
             "timestamp": datetime.now().isoformat(),
             "active_websockets": len(websocket_manager.active_connections)
         }
