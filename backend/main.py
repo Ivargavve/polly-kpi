@@ -139,7 +139,7 @@ class ConversationManager:
                                 "model": request_data.get("model", "unknown"),
                                 "status": request_data.get("status", "success")
                             },
-                            "expires_at": (datetime.now() + timedelta(minutes=1)).isoformat()
+                            "expires_at": (datetime.now() + timedelta(minutes=2)).isoformat()
                         }
 
                         new_conversations.append(conversation_event)

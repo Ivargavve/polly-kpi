@@ -4,87 +4,73 @@ import { motion } from 'framer-motion';
 import { format, formatDistanceToNow } from 'date-fns';
 
 const StatsContainer = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 1rem;
+  background: #1a1a1a;
+  border-radius: 8px;
+  border: 1px solid #333;
+  padding: 0.75rem;
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 `;
 
 const StatsHeader = styled.div`
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.5rem;
   flex-shrink: 0;
 `;
 
 const StatsTitle = styled.h2`
   margin: 0;
-  font-size: 1.3rem;
-  color: white;
-  font-weight: 600;
+  font-size: 0.9rem;
+  color: #e0e0e0;
+  font-weight: 500;
 `;
 
 const StatsSubtitle = styled.p`
   margin: 0.25rem 0 0 0;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  color: #999;
 `;
 
 const StatsGrid = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.25rem;
   flex: 1;
-  overflow-y: auto;
 `;
 
-const StatCard = styled(motion.div)`
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
+const StatRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #333;
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
+  &:last-child {
+    border-bottom: none;
   }
 `;
 
-const StatIcon = styled.div`
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-`;
-
-const StatValue = styled(motion.div)`
-  font-size: 2rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 0.25rem;
-`;
-
 const StatLabel = styled.div`
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
+  font-size: 0.7rem;
+  color: #bbb;
+  font-weight: 400;
 `;
 
-const StatSubtext = styled.div`
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: 0.25rem;
+const StatValue = styled.div`
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #e0e0e0;
 `;
 
 const ConnectionInfo = styled.div`
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 12px;
-  padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #202020;
+  border-radius: 6px;
+  padding: 0.5rem;
+  border: 1px solid #444;
   flex-shrink: 0;
 `;
 
@@ -92,7 +78,7 @@ const ConnectionRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 
   &:last-child {
     margin-bottom: 0;
@@ -100,23 +86,21 @@ const ConnectionRow = styled.div`
 `;
 
 const ConnectionLabel = styled.span`
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.65rem;
+  color: #999;
 `;
 
 const ConnectionValue = styled.span`
-  font-size: 0.8rem;
-  color: white;
-  font-weight: 500;
+  font-size: 0.65rem;
+  color: #e0e0e0;
+  font-weight: 400;
 `;
 
-const ConnectionDot = styled.div.withConfig({
-  shouldForwardProp: (prop) => prop !== 'isConnected'
-})`
+const ConnectionDot = styled.div`
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: ${props => props.isConnected ? '#4ade80' : '#f87171'};
+  background: #3b82f6;
   margin-right: 0.5rem;
 `;
 
@@ -165,81 +149,31 @@ function StatsPanel({ stats, connectionStatus, isConnected }) {
       </StatsHeader>
 
       <StatsGrid>
-        <StatCard
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={{ scale: 1.02 }}
-        >
-          <StatIcon>💬</StatIcon>
-          <StatValue
-            variants={numberVariants}
-            key={stats.total_conversations}
-          >
-            {stats.total_conversations || 0}
-          </StatValue>
+        <StatRow>
           <StatLabel>Total Conversations</StatLabel>
-          <StatSubtext>Since monitoring started</StatSubtext>
-        </StatCard>
+          <StatValue>{stats.total_conversations || 0}</StatValue>
+        </StatRow>
 
-        <StatCard
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={{ scale: 1.02 }}
-        >
-          <StatIcon>⚡</StatIcon>
-          <StatValue
-            variants={numberVariants}
-            key={stats.messages_per_minute}
-          >
-            {stats.messages_per_minute || 0}
-          </StatValue>
+        <StatRow>
           <StatLabel>Messages/Minute</StatLabel>
-          <StatSubtext>Current activity rate</StatSubtext>
-        </StatCard>
+          <StatValue>{stats.messages_per_minute || 0}</StatValue>
+        </StatRow>
 
-        <StatCard
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={{ scale: 1.02 }}
-        >
-          <StatIcon>⏱️</StatIcon>
-          <StatValue
-            variants={numberVariants}
-            key={stats.average_response_time}
-          >
-            {stats.average_response_time || 0}
-            <span style={{ fontSize: '1rem', opacity: 0.7 }}>ms</span>
-          </StatValue>
+        <StatRow>
           <StatLabel>Avg Response Time</StatLabel>
-          <StatSubtext>Recent conversations</StatSubtext>
-        </StatCard>
+          <StatValue>{stats.average_response_time || 0}ms</StatValue>
+        </StatRow>
 
-        <StatCard
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={{ scale: 1.02 }}
-        >
-          <StatIcon>🔄</StatIcon>
-          <StatValue
-            variants={numberVariants}
-            key={stats.active_websockets}
-            style={{ fontSize: '1.5rem' }}
-          >
-            {stats.active_websockets || 0}
-          </StatValue>
+        <StatRow>
           <StatLabel>Active Connections</StatLabel>
-          <StatSubtext>WebSocket clients</StatSubtext>
-        </StatCard>
+          <StatValue>{stats.active_websockets || 0}</StatValue>
+        </StatRow>
       </StatsGrid>
 
       <ConnectionInfo>
         <ConnectionRow>
           <ConnectionLabel style={{ display: 'flex', alignItems: 'center' }}>
-            <ConnectionDot isConnected={isConnected} />
+            <ConnectionDot />
             Status
           </ConnectionLabel>
           <ConnectionValue>{connectionStatus}</ConnectionValue>

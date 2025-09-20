@@ -4,43 +4,64 @@ import useWebSocket, { ReadyState } from 'react-use-websocket';
 import LiveMessageDisplay from './components/LiveMessageDisplay';
 import StatsPanel from './components/StatsPanel';
 import ConnectionStatus from './components/ConnectionStatus';
-import Header from './components/Header';
 
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
   color: white;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   overflow: hidden;
 `;
 
+const BackgroundVideo = styled.video`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  opacity: 0.7;
+`;
+
+const VideoOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: -1;
+`;
+
 const MainContent = styled.div`
-  display: flex;
+  position: relative;
   flex: 1;
-  gap: 1rem;
-  padding: 0.5rem;
-  height: calc(100vh - 140px);
+  height: calc(100vh - 80px);
   overflow: hidden;
 `;
 
 const LiveMessageSection = styled.div`
-  flex: 3;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  height: 100%;
+  position: relative;
+  margin: 0 auto;
 `;
 
 const StatsSection = styled.div`
-  flex: 1;
-  min-width: 300px;
-  max-width: 350px;
-  overflow: hidden;
-  height: 100%;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 220px;
+  height: 300px;
+  z-index: 100;
 `;
 
 const WS_URL = process.env.REACT_APP_WS_URL || 'ws://localhost:8000/ws';
@@ -81,7 +102,7 @@ function App() {
       switch (data.type) {
         case 'new_message':
           // Add new message with temporary display
-          setLiveMessages(prev => [...prev, data]);
+          setLiveMessages(prev => [data, ...prev]);
 
           // Simulate typing indicator
           setIsPollyTyping(true);
@@ -130,6 +151,8 @@ function App() {
         if (messagesResponse.ok) {
           const messagesData = await messagesResponse.json();
           setLiveMessages(messagesData.messages || []);
+        } else {
+          console.warn('Backend not available - messages endpoint returned:', messagesResponse.status);
         }
 
         // Fetch initial stats
@@ -137,9 +160,19 @@ function App() {
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
           setStats(statsData);
+        } else {
+          console.warn('Backend not available - stats endpoint returned:', statsResponse.status);
         }
       } catch (error) {
-        console.error('Error fetching initial data:', error);
+        console.warn('Backend not available:', error.message);
+        // Set default stats when backend is unavailable
+        setStats({
+          total_conversations: 0,
+          messages_per_minute: 0,
+          average_response_time: 0,
+          last_activity: null,
+          active_websockets: 0
+        });
       }
     };
 
@@ -156,7 +189,24 @@ function App() {
 
   return (
     <AppContainer>
-      <Header />
+      <BackgroundVideo
+        autoPlay
+        muted
+        loop
+        playsInline
+      >
+        <source src="/videos/tech-background2.mp4" type="video/mp4" />
+        {/* Fallback gradient if video fails to load */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        }} />
+      </BackgroundVideo>
+      <VideoOverlay />
       <ConnectionStatus
         status={connectionStatus}
         isConnected={readyState === ReadyState.OPEN}
