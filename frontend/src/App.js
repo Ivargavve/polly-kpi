@@ -75,7 +75,7 @@ function App() {
     last_activity: null,
     active_websockets: 0
   });
-  const [isPollyTyping, setIsPollyTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   const {
     lastMessage,
@@ -105,8 +105,8 @@ function App() {
           setLiveMessages(prev => [data, ...prev]);
 
           // Simulate typing indicator
-          setIsPollyTyping(true);
-          setTimeout(() => setIsPollyTyping(false), 2000);
+          setIsTyping(true);
+          setTimeout(() => setIsTyping(false), 2000);
           break;
 
         case 'live_messages_update':
@@ -119,8 +119,8 @@ function App() {
           break;
 
         case 'typing_indicator':
-          setIsPollyTyping(true);
-          setTimeout(() => setIsPollyTyping(false), data.duration || 3000);
+          setIsTyping(true);
+          setTimeout(() => setIsTyping(false), data.duration || 3000);
           break;
 
         case 'heartbeat':
@@ -215,7 +215,7 @@ function App() {
         <LiveMessageSection>
           <LiveMessageDisplay
             liveMessages={liveMessages}
-            isPollyTyping={isPollyTyping}
+            isTyping={isTyping}
           />
         </LiveMessageSection>
         <StatsSection>

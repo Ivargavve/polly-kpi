@@ -131,7 +131,7 @@ class ConversationManager:
                             "type": "new_message",
                             "timestamp": request_data.get("timestamp", datetime.now().isoformat()),
                             "user_message": request_data.get("user_message", ""),
-                            "polly_response": request_data.get("polly_response", ""),
+                            "ai_response": request_data.get("ai_response", ""),
                             "metadata": {
                                 "prompt_name": request_data.get("prompt_name", "unknown"),
                                 "tokens_used": request_data.get("tokens_used", {}),
@@ -286,7 +286,7 @@ async def lifespan(app: FastAPI):
     # Start processing task
     processing_task_handle = asyncio.create_task(processing_task())
 
-    logger.info("Polly Monitor backend started successfully")
+    logger.info("ChatStream backend started successfully")
 
     try:
         yield
@@ -297,13 +297,13 @@ async def lifespan(app: FastAPI):
             await processing_task_handle
         except asyncio.CancelledError:
             pass
-        logger.info("Polly Monitor backend stopped")
+        logger.info("ChatStream backend stopped")
 
 
 # Create FastAPI app
 app = FastAPI(
-    title="Polly Monitor API",
-    description="Real-time monitoring API for Polly AI chatbot",
+    title="ChatStream API",
+    description="Real-time chat visualization API",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -368,12 +368,12 @@ async def get_stats():
 
 @app.post("/webhook/conversation")
 async def webhook_conversation(request_data: dict):
-    """Webhook endpoint to receive real-time conversation data from Polly"""
+    """Webhook endpoint to receive real-time conversation data"""
     try:
         logger.info(f"Received webhook data: {request_data}")
 
         # Validate required fields
-        required_fields = ["user_message", "polly_response"]
+        required_fields = ["user_message", "ai_response"]
         for field in required_fields:
             if field not in request_data:
                 raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
@@ -394,7 +394,7 @@ async def webhook_conversation(request_data: dict):
 
 @app.post("/webhook/user-message")
 async def webhook_user_message(message_data: dict):
-    """Webhook endpoint to receive user messages (before Polly responds)"""
+    """Webhook endpoint to receive user messages (before AI responds)"""
     try:
         logger.info(f"User message received: {message_data}")
 
@@ -403,7 +403,7 @@ async def webhook_user_message(message_data: dict):
             "id": message_data.get("id", f"pending_{int(datetime.now().timestamp() * 1000)}"),
             "timestamp": message_data.get("timestamp", datetime.now().isoformat()),
             "user_message": message_data.get("message", ""),
-            "polly_response": "",  # Will be filled when response comes
+            "ai_response": "",  # Will be filled when response comes
             "status": "pending",
             "prompt_name": message_data.get("prompt_name", "unknown"),
             "model": message_data.get("model", "unknown")
@@ -422,18 +422,18 @@ async def webhook_user_message(message_data: dict):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/webhook/polly-response")
-async def webhook_polly_response(response_data: dict):
-    """Webhook endpoint to receive Polly responses"""
+@app.post("/webhook/ai-response")
+async def webhook_ai_response(response_data: dict):
+    """Webhook endpoint to receive AI responses"""
     try:
-        logger.info(f"Polly response received: {response_data}")
+        logger.info(f"AI response received: {response_data}")
 
         # Process the complete conversation
         conversation_data = {
             "id": response_data.get("id", f"response_{int(datetime.now().timestamp() * 1000)}"),
             "timestamp": response_data.get("timestamp", datetime.now().isoformat()),
             "user_message": response_data.get("user_message", ""),
-            "polly_response": response_data.get("response", ""),
+            "ai_response": response_data.get("response", ""),
             "prompt_name": response_data.get("prompt_name", "unknown"),
             "model": response_data.get("model", "unknown"),
             "latency_ms": response_data.get("latency_ms", 0),
@@ -444,10 +444,10 @@ async def webhook_polly_response(response_data: dict):
         # Add to live requests
         conversation_manager.add_live_request(conversation_data)
 
-        return {"status": "success", "message": "Polly response received"}
+        return {"status": "success", "message": "AI response received"}
 
     except Exception as e:
-        logger.error(f"Polly response webhook error: {e}")
+        logger.error(f"AI response webhook error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

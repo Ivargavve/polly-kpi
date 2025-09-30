@@ -89,7 +89,7 @@ const EmptySubtext = styled.p`
   opacity: 0.7;
 `;
 
-function ChatInterface({ conversations, isPollyTyping }) {
+function ChatInterface({ conversations, isTyping }) {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -98,7 +98,7 @@ function ChatInterface({ conversations, isPollyTyping }) {
 
   useEffect(() => {
     scrollToBottom();
-  }, [conversations, isPollyTyping]);
+  }, [conversations, isTyping]);
 
   const getLastActivityText = () => {
     if (!conversations.length) return "No activity yet";
@@ -141,7 +141,7 @@ function ChatInterface({ conversations, isPollyTyping }) {
               >
                 💬
               </EmptyIcon>
-              <EmptyText>Waiting for Polly to start conversations...</EmptyText>
+              <EmptyText>Waiting for conversations...</EmptyText>
               <EmptySubtext>
                 Real-time chat interactions will appear here
               </EmptySubtext>
@@ -158,7 +158,7 @@ function ChatInterface({ conversations, isPollyTyping }) {
         </AnimatePresence>
 
         <AnimatePresence>
-          {isPollyTyping && <TypingIndicator />}
+          {isTyping && <TypingIndicator />}
         </AnimatePresence>
 
         <div ref={messagesEndRef} />

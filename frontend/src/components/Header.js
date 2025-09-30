@@ -25,7 +25,7 @@ const Title = styled(motion.h1)`
   gap: 0.5rem;
 `;
 
-const PollyIcon = styled(motion.div)`
+const ChatIcon = styled(motion.div)`
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -53,7 +53,7 @@ function Header() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <PollyIcon
+          <ChatIcon
             animate={{
               rotate: [0, 360],
               scale: [1, 1.1, 1]
@@ -63,11 +63,11 @@ function Header() {
               scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
             }}
           >
-            🤖
-          </PollyIcon>
-          Polly Monitor
+            💬
+          </ChatIcon>
+          ChatStream
         </Title>
-        <Subtitle>Real-time AI Chatbot Visualization</Subtitle>
+        <Subtitle>Real-time Chat Visualization</Subtitle>
       </div>
     </HeaderContainer>
   );

@@ -29,7 +29,7 @@ const UserMessage = styled(motion.div)`
   backdrop-filter: blur(5px);
 `;
 
-const PollyMessage = styled(motion.div)`
+const AIMessage = styled(motion.div)`
   align-self: flex-end;
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
@@ -163,13 +163,13 @@ function MessageBubble({ conversation, isNew }) {
           {conversation.user_message}
         </UserMessage>
 
-        <PollyMessage
+        <AIMessage
           variants={messageVariants}
           whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
-          {conversation.polly_response}
-        </PollyMessage>
+          {conversation.ai_response}
+        </AIMessage>
       </MessagePair>
 
       {conversation.metadata && (

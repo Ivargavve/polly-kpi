@@ -1,7 +1,7 @@
 {
-  "name": "polly-monitor-frontend",
+  "name": "chatstream-frontend",
   "version": "1.0.0",
-  "description": "Real-time visualization dashboard for Polly AI chatbot",
+  "description": "Real-time chat visualization platform",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",

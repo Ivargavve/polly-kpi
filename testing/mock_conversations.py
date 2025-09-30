@@ -16,27 +16,27 @@ BASE_URL = "http://localhost:8000"
 MOCK_CONVERSATIONS = [
     {
         "user_message": "What are the top KPIs for Q4?",
-        "polly_response": "Based on our analysis, the top KPIs for Q4 are: 1) Revenue Growth (15% target), 2) Customer Acquisition Cost (CAC), and 3) Net Promoter Score (NPS).",
+        "ai_response": "Based on our analysis, the top KPIs for Q4 are: 1) Revenue Growth (15% target), 2) Customer Acquisition Cost (CAC), and 3) Net Promoter Score (NPS).",
         "prompt_name": "kpi_analysis"
     },
     {
         "user_message": "How is our customer retention looking?",
-        "polly_response": "Customer retention is at 87% this quarter, which is above our 85% target. Key factors include improved onboarding and enhanced customer support.",
+        "ai_response": "Customer retention is at 87% this quarter, which is above our 85% target. Key factors include improved onboarding and enhanced customer support.",
         "prompt_name": "retention_analysis"
     },
     {
         "user_message": "Show me sales data for last month",
-        "polly_response": "Last month's sales totaled $1.2M, up 8% from the previous month. Top performing region was EMEA with 35% of total sales.",
+        "ai_response": "Last month's sales totaled $1.2M, up 8% from the previous month. Top performing region was EMEA with 35% of total sales.",
         "prompt_name": "sales_query"
     },
     {
         "user_message": "What's our churn rate?",
-        "polly_response": "Current churn rate is 3.5%, down from 4.2% last quarter. This improvement is due to our new customer success initiatives.",
+        "ai_response": "Current churn rate is 3.5%, down from 4.2% last quarter. This improvement is due to our new customer success initiatives.",
         "prompt_name": "churn_analysis"
     },
     {
         "user_message": "Compare Q3 vs Q2 performance",
-        "polly_response": "Q3 showed 12% revenue growth vs Q2, with improved margins of 2.3%. Customer acquisition increased by 18% while CAC decreased by 7%.",
+        "ai_response": "Q3 showed 12% revenue growth vs Q2, with improved margins of 2.3%. Customer acquisition increased by 18% while CAC decreased by 7%.",
         "prompt_name": "quarterly_comparison"
     }
 ]

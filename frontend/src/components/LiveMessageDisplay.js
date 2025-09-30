@@ -195,7 +195,7 @@ const ExpirationDot = styled.div.withConfig({
   ` : 'none'} 1s ease-in-out infinite;
 `;
 
-function LiveMessageDisplay({ liveMessages, isPollyTyping }) {
+function LiveMessageDisplay({ liveMessages, isTyping }) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Update current time every second for expiration calculations
@@ -262,7 +262,7 @@ function LiveMessageDisplay({ liveMessages, isPollyTyping }) {
           animate="visible"
         >
           <WaitingText>
-            Polly is waiting
+            Waiting for messages
             <AnimatedDot>.</AnimatedDot>
             <AnimatedDot>.</AnimatedDot>
             <AnimatedDot>.</AnimatedDot>
@@ -322,13 +322,13 @@ function LiveMessageDisplay({ liveMessages, isPollyTyping }) {
                     </MessageRow>
                   )}
 
-                  {message.polly_response && (
+                  {message.ai_response && (
                     <MessageRow>
                       <MessageLabel>
-                        <img src="/polly.png" alt="Polly" style={{width: '1em', height: '1em'}} /> Polly
+                        🤖 AI Assistant
                       </MessageLabel>
                       <MessageText isUser={false}>
-                        {message.polly_response}
+                        {message.ai_response}
                       </MessageText>
                     </MessageRow>
                   )}

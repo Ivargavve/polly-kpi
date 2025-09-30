@@ -90,7 +90,7 @@ function TypingIndicator() {
       animate="visible"
       exit="exit"
     >
-      <TypingText>Polly is thinking</TypingText>
+      <TypingText>AI is thinking</TypingText>
       <DotsContainer>
         <Dot
           variants={dotVariants}
