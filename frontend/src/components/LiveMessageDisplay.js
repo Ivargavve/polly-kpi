@@ -66,7 +66,7 @@ const MessagesContainer = styled.div`
   margin: auto 0;
 `;
 
-const MessageCard = styled.div.withConfig({
+const MessageCard = styled(motion.div).withConfig({
   shouldForwardProp: (prop) => !['messageIndex', 'totalMessages'].includes(prop)
 })`
   background: rgba(255, 255, 255, ${props => props.messageIndex === 0 ? 0.12 : Math.max(0.02, 0.12 * (1 - props.messageIndex * 0.18))});
@@ -102,7 +102,6 @@ const MessageCard = styled.div.withConfig({
     return offset;
   }}px;
   left: 50%;
-  transform: translateX(-50%) scale(${props => Math.max(0.75, 1 - props.messageIndex * 0.06)});
   z-index: ${props => 1000 - props.messageIndex};
   overflow: hidden;
   display: flex;
@@ -219,12 +218,14 @@ function LiveMessageDisplay({ liveMessages, isPollyTyping }) {
     hidden: {
       opacity: 0,
       y: -150,
-      scale: 1
+      scale: 1,
+      x: "-50%"
     },
     visible: (index) => ({
       opacity: index === 0 ? 1 : Math.max(0.1, 1 - index * 0.225),
       y: 0,
       scale: Math.max(0.75, 1 - index * 0.06),
+      x: "-50%",
       transition: {
         type: "tween",
         duration: 0.4,
@@ -236,6 +237,7 @@ function LiveMessageDisplay({ liveMessages, isPollyTyping }) {
       opacity: 0,
       y: 200,
       scale: 0.6,
+      x: "-50%",
       transition: {
         duration: 0.5,
         ease: "easeInOut"
@@ -282,6 +284,7 @@ function LiveMessageDisplay({ liveMessages, isPollyTyping }) {
   return (
     <Container>
       <MessagesContainer>
+        <AnimatePresence>
           {displayMessages.map((message, index) => {
             const timeRemaining = calculateTimeRemaining(message.expires_at);
             const isExpiring = timeRemaining !== null && timeRemaining < 300;
@@ -291,6 +294,11 @@ function LiveMessageDisplay({ liveMessages, isPollyTyping }) {
                 key={message.id}
                 messageIndex={index}
                 totalMessages={displayMessages.length}
+                custom={index}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
               >
                 <MessageHeader>
                   <MessageTimestamp>
@@ -338,6 +346,7 @@ function LiveMessageDisplay({ liveMessages, isPollyTyping }) {
               </MessageCard>
             );
           })}
+        </AnimatePresence>
       </MessagesContainer>
     </Container>
   );
